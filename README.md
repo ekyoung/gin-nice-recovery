@@ -16,6 +16,8 @@ $ go get github.com/ekyoung/gin-nice-recovery
 ## Usage
 
 ```go
+package main
+
 import (
     "github.com/ekyoung/gin-nice-recovery"
     "github.com/gin-gonic/gin"
