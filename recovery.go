@@ -3,7 +3,6 @@ package nice
 import (
     "io"
     "log"
-    "net/http"
     "net/http/httputil"
 
     "github.com/go-errors/errors"
@@ -11,11 +10,11 @@ import (
     "github.com/gin-gonic/gin"
 )
 
-func Recovery(name string, obj interface{}) gin.HandlerFunc {
-    return RecoveryWithWriter(name, obj, gin.DefaultErrorWriter)
+func Recovery(f func(c *gin.Context, err interface{})) gin.HandlerFunc {
+    return RecoveryWithWriter(f, gin.DefaultErrorWriter)
 }
 
-func RecoveryWithWriter(name string, obj interface{}, out io.Writer) gin.HandlerFunc {
+func RecoveryWithWriter(f func(c *gin.Context, err interface{}), out io.Writer) gin.HandlerFunc {
     var logger *log.Logger
     if out != nil {
         logger = log.New(out, "\n\n\x1b[31m", log.LstdFlags)
@@ -31,7 +30,7 @@ func RecoveryWithWriter(name string, obj interface{}, out io.Writer) gin.Handler
                     logger.Printf("[Nice Recovery] panic recovered:\n\n%s%s\n\n%s%s", httprequest, goErr.Error(), goErr.Stack(), reset)
                 }
 
-                c.HTML(http.StatusInternalServerError, name, obj)
+                f(c, err)
             }
         }()
         c.Next() // execute all the handlers
